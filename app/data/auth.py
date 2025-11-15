@@ -111,8 +111,8 @@ def main():
                 continue
 
             # Register the user
-            register_user(username, password)
-            if success:
+
+            if register_user(username, password):
                 print(f"\nSuccess: User '{username}' registered successfully!")
             else:
                 print(f"\nFailure: Username '{username}' already exists.")
