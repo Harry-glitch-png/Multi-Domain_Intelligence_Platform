@@ -133,7 +133,6 @@ def load_csv_to_table(conn, csv_path, table_name):
     """
     Load a CSV file into a database table using pandas.
 
-    TODO: Implement this function.
 
     Args:
         conn: Database connection
@@ -151,9 +150,19 @@ def load_csv_to_table(conn, csv_path, table_name):
     # Read CSV into DataFrame
     df = pd.read_csv(csv_path)
 
-    # Bulk insert all rows
-    df.to_sql(table_name, conn, if_exists='append', index=False)
-    print("✓ Data loaded successfully")
+    # Read existing rows
+    existing = pd.read_sql_query(f"SELECT * FROM {table_name}", conn)
+
+    # Merge and keep only new rows
+    new_rows = df.merge(existing, how="left", indicator=True)
+    new_rows = new_rows[new_rows["_merge"] == "left_only"].drop(columns=["_merge"])
+
+    # Bulk insert all new rows
+    if not new_rows.empty:
+        new_rows.to_sql(table_name, conn, if_exists="append", index=False)
+        print("Data loaded successfully")
+    else:
+        print("No new data to load")
 
     # Count rows in database
     cursor = conn.cursor()
@@ -161,6 +170,3 @@ def load_csv_to_table(conn, csv_path, table_name):
     count = cursor.fetchone()[0]
     print(f"Loaded {count} rows")
     return count
-
-
-

@@ -1,7 +1,14 @@
 from app.data.db import connect_database
 from app.data.schema import create_all_tables
-from app.services.user_service import register_user, login_user, migrate_users_from_file
-from app.data.incidents import insert_incident, get_all_incidents
+#from app.services.user_service import register_user, login_user, migrate_users_from_file
+from app.services.user_service import *
+#from app.data.incidents import insert_incident, get_all_incidents, update_incident_status, delete_incident
+from app.data.incidents import *
+import pandas as pd
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = Path("DATA") / "intelligence_platform.db"
+DATA_DIR = BASE_DIR / "DATA"
 
 def main():
 
@@ -28,10 +35,10 @@ def main():
     incident_id = insert_incident(
         conn,
         "2024-11-05",
-        "Phishing",
         "High",
+        "Phishing",
         "Open",
-        "Suspicious email detected",
+        "Suspicious email detected"
     )
     print(f"Created incident #{incident_id}")
 
@@ -69,7 +76,7 @@ def setup_database_complete():
 
     # Step 4: Load CSV data
     print("\n[4/5] Loading CSV data...")
-    total_rows = load_all_csv_data(conn)
+    total_rows = load_csv_to_table(conn, "app/data/DATA/cyber_incidents.csv", "cyber_incidents")
 
     # Step 5: Verify
     print("\n[5/5] Verifying database setup...")
@@ -94,7 +101,7 @@ def setup_database_complete():
     print(f"\n Database location: {DB_PATH.resolve()}")
     print("\nYou're ready for Week 9 (Streamlit web interface)!")
 
-    def run_comprehensive_tests():
+def run_comprehensive_tests():
         """
         Run comprehensive tests on your database.
         """
@@ -119,8 +126,8 @@ def setup_database_complete():
         test_id = insert_incident(
             conn,
             "2024-11-05",
-            "Test Incident",
             "Low",
+            "Test Incident",
             "Open",
             "This is a test incident",
             "test_user"
@@ -129,7 +136,7 @@ def setup_database_complete():
 
         # Read
         df = pd.read_sql_query(
-            "SELECT * FROM cyber_incidents WHERE id = ?",
+            "SELECT * FROM cyber_incidents WHERE incident_id = ?",
             conn,
             params=(test_id,)
         )
@@ -159,10 +166,14 @@ def setup_database_complete():
         print("=" * 60)
 
 
+
 if __name__ == "__main__":
     # Run the complete setup
-    #main()
+    main()
     # Run the complete setup
-    #setup_database_complete()
+    conn = connect_database()
+    create_all_tables(conn)
+
+    setup_database_complete()
     # Run tests
     run_comprehensive_tests()
