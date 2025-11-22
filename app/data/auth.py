@@ -50,7 +50,6 @@ def validate_username(username):
         return True, "Valid username."
     return False, "The must be alphanumeric characters in your username."
 
-
 def validate_password(password):
     if len(password) < 6:
         return False, "Password must be at least 6 characters long."

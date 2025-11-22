@@ -3,10 +3,10 @@ from pathlib import Path
 from app.data.db import connect_database
 from app.data.users import get_user_by_username, insert_user
 from app.data.schema import create_users_table
-from app.config import DATA_DIR, DB_PATH
 import pandas as pd
 import sqlite3
 from app.config import DATA_DIR, DB_PATH
+from app.data.auth import *
 
 
 def register_user(username, password, role="user"):
@@ -33,10 +33,16 @@ def register_user(username, password, role="user"):
         return False, f"Username '{username}' already exists."
 
     # Hash the password
-    password_bytes = password.encode('utf-8')
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password_bytes, salt)
-    password_hash = hashed.decode('utf-8')
+    success, msg = validate_password(password)
+    if success:
+        password_hash = hash_password(password)
+    else:
+        return success, msg
+
+    # password_bytes = password.encode('utf-8')
+    # salt = bcrypt.gensalt()
+    # hashed = bcrypt.hashpw(password_bytes, salt)
+    # password_hash = hashed.decode('utf-8')
 
     # Insert new user
     cursor.execute(

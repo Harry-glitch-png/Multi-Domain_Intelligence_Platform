@@ -1,11 +1,11 @@
 from app.data.db import connect_database
 from app.data.schema import create_all_tables
-#from app.services.user_service import register_user, login_user, migrate_users_from_file
-from app.services.user_service import *
-#from app.data.incidents import insert_incident, get_all_incidents, update_incident_status, delete_incident
+
 from app.data.incidents import *
 import pandas as pd
 from pathlib import Path
+from app.data.users import *
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH = Path("DATA") / "intelligence_platform.db"
 DATA_DIR = BASE_DIR / "DATA"
@@ -171,9 +171,10 @@ if __name__ == "__main__":
     # Run the complete setup
     main()
     # Run the complete setup
-    conn = connect_database()
     create_all_tables(conn)
 
     setup_database_complete()
     # Run tests
     run_comprehensive_tests()
+
+    print(get_user_by_username("test_user"))
